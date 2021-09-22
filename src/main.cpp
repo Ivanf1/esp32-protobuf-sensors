@@ -1,10 +1,11 @@
 #include <Arduino.h>
 #include <HTTPClient.h>
-#include <pb_decode.h> // headers from nanopb
-#include <pb_encode.h> // -------------------
+#include <pb_decode.h>
+#include <pb_encode.h>
 
 #include "nanopbGenerated/update.pb.h" // header generated based on update.proto
 #include "encodeCallback/encodeCallback.h"
+#include "utils/reboot.h"
 #include "secrets.h"
 
 #define DEVICE_ID "testdev001"
@@ -42,7 +43,7 @@ bool readSensorsAndEncode(uint8_t* buffer, pb_ostream_t* stream, SensorUpdateMsg
 
   // encode whole message and write it to buffer
   if (!pb_encode(stream, DeviceUpdateMsg_fields, &update)) {
-    Serial.println("failed to encode device update message");
+    ESP_LOGE(TAG, "failed to encode device update message, %s", PB_GET_ERROR(stream));
     return false;
   }
 
@@ -63,14 +64,12 @@ void setup() {
   WiFi.begin(WIFI_SSID, WIFI_PASS);
 
   if (WiFi.waitForConnectResult() != WL_CONNECTED) {
-    Serial.println("Error connecting to wifi");
-    return;
+    rebootWithMsg("Error connecting to wifi");
   }
   
   sensorMessages.messages = (SensorUpdateMsg**) pvPortMalloc(sizeof(SensorUpdateMsg*) * NUMBER_OF_SENSORS);
   if (!sensorMessages.messages) {
-    Serial.println("malloc failed");
-    return;
+    rebootWithMsg("malloc for sensor messages array failed");
   }
 }
 
