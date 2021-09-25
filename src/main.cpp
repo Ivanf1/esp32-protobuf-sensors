@@ -6,10 +6,11 @@
 #include "nanopbGenerated/update.pb.h" // header generated based on update.proto
 #include "encodeCallback/encodeCallback.h"
 #include "utils/reboot.h"
+#include "utils/time.h"
 #include "secrets.h"
 
-#define DEVICE_ID "testdev001"
-#define SENSOR_ID "senstest002"
+#define DEVICE_ID 1
+#define SENSOR_ID 1
 #define NUMBER_OF_SENSORS 2
 
 // buffer that will contain the encoded message
@@ -21,24 +22,33 @@ bool readSensorsAndEncode(uint8_t* buffer, pb_ostream_t* stream, SensorUpdateMsg
   DeviceUpdateMsg update = DeviceUpdateMsg_init_zero;
 
   // set the 'arg' for the encode callback for the deviceId field
-  update.deviceId.arg = (void*)DEVICE_ID;
-  // set 'encode_string' as encode callback for the deviceId field
-  update.deviceId.funcs.encode = &encode_string;
+  update.deviceId = DEVICE_ID;
 
   // set 'encode_sensor_message_array' as encode callback for the sensor messages
   update.sensor.funcs.encode = &encode_sensor_message_array;
   // set the 'arg' for the encode callback
   update.sensor.arg = sensorMessages;
 
-  SensorUpdateMsg sensUpdate = SensorUpdateMsg_init_zero;
-  sensUpdate.sensorId.arg = (void*)SENSOR_ID;
-  sensUpdate.sensorId.funcs.encode = &encode_string;
-  sensUpdate.value.valueInt = 12;
+  SensorUpdateMsg sensUpdate0 = SensorUpdateMsg_init_zero;
+  sensUpdate0.sensorId = SENSOR_ID;
+  sensUpdate0.value.valueInt = random(20, 22);
   // since 'value' is a union type, we need to set 'which_value' with the correct tag
-  sensUpdate.which_value = SensorUpdateMsg_valueInt_tag;
+  sensUpdate0.which_value = SensorUpdateMsg_valueInt_tag;
+  sensUpdate0.type = SensorUpdateMsg_Type::SensorUpdateMsg_Type_TEMPERATURE;
+  sensUpdate0.time = static_cast<int64_t>(getTime());
 
-  sensorMessages->messages[0] = &sensUpdate;
-  sensorMessages->messages[1] = &sensUpdate;
+  sensorMessages->messages[0] = &sensUpdate0;
+
+  SensorUpdateMsg sensUpdate1 = SensorUpdateMsg_init_zero;
+  sensUpdate1.sensorId = SENSOR_ID;
+  sensUpdate1.value.valueInt = random(48, 50);
+  // since 'value' is a union type, we need to set 'which_value' with the correct tag
+  sensUpdate1.which_value = SensorUpdateMsg_valueInt_tag;
+  sensUpdate1.type = SensorUpdateMsg_Type::SensorUpdateMsg_Type_HUMIDITY;
+  sensUpdate1.time = static_cast<int64_t>(getTime());
+
+  sensorMessages->messages[1] = &sensUpdate1;
+
   sensorMessages->size = NUMBER_OF_SENSORS;
 
   // encode whole message and write it to buffer
@@ -71,6 +81,8 @@ void setup() {
   if (!sensorMessages.messages) {
     rebootWithMsg("malloc for sensor messages array failed");
   }
+
+  configTime(0, 3600, "pool.ntp.org");
 }
 
 void loop() {

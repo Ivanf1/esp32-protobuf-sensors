@@ -33,7 +33,7 @@ bool encode_sensor_message_array(pb_ostream_t* stream, const pb_field_t* field, 
       return false;
     }
 
-    if (!pb_encode_submessage(stream, SensorUpdateMsg_fields, sensorMessages->messages[0])) {
+    if (!pb_encode_submessage(stream, SensorUpdateMsg_fields, sensorMessages->messages[i])) {
       return false;
     }
   }

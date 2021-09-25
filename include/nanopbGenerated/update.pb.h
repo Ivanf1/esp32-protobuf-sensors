@@ -9,14 +9,22 @@
 #error Regenerate this file with the current version of nanopb generator.
 #endif
 
+/* Enum definitions */
+typedef enum _SensorUpdateMsg_Type { 
+    SensorUpdateMsg_Type_TEMPERATURE = 0, 
+    SensorUpdateMsg_Type_HUMIDITY = 1 
+} SensorUpdateMsg_Type;
+
 /* Struct definitions */
 typedef struct _DeviceUpdateMsg { 
-    pb_callback_t deviceId; 
+    uint64_t deviceId; 
     pb_callback_t sensor; 
 } DeviceUpdateMsg;
 
 typedef struct _SensorUpdateMsg { 
-    pb_callback_t sensorId; 
+    uint64_t sensorId; 
+    SensorUpdateMsg_Type type; 
+    int64_t time; 
     pb_size_t which_value;
     union {
         int32_t valueInt;
@@ -26,38 +34,48 @@ typedef struct _SensorUpdateMsg {
 } SensorUpdateMsg;
 
 
+/* Helper constants for enums */
+#define _SensorUpdateMsg_Type_MIN SensorUpdateMsg_Type_TEMPERATURE
+#define _SensorUpdateMsg_Type_MAX SensorUpdateMsg_Type_HUMIDITY
+#define _SensorUpdateMsg_Type_ARRAYSIZE ((SensorUpdateMsg_Type)(SensorUpdateMsg_Type_HUMIDITY+1))
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /* Initializer values for message structs */
-#define DeviceUpdateMsg_init_default             {{{NULL}, NULL}, {{NULL}, NULL}}
-#define SensorUpdateMsg_init_default             {{{NULL}, NULL}, 0, {0}}
-#define DeviceUpdateMsg_init_zero                {{{NULL}, NULL}, {{NULL}, NULL}}
-#define SensorUpdateMsg_init_zero                {{{NULL}, NULL}, 0, {0}}
+#define DeviceUpdateMsg_init_default             {0, {{NULL}, NULL}}
+#define SensorUpdateMsg_init_default             {0, _SensorUpdateMsg_Type_MIN, 0, 0, {0}}
+#define DeviceUpdateMsg_init_zero                {0, {{NULL}, NULL}}
+#define SensorUpdateMsg_init_zero                {0, _SensorUpdateMsg_Type_MIN, 0, 0, {0}}
 
 /* Field tags (for use in manual encoding/decoding) */
 #define DeviceUpdateMsg_deviceId_tag             1
 #define DeviceUpdateMsg_sensor_tag               2
 #define SensorUpdateMsg_sensorId_tag             1
-#define SensorUpdateMsg_valueInt_tag             2
-#define SensorUpdateMsg_valueFloat_tag           3
-#define SensorUpdateMsg_valueBool_tag            4
+#define SensorUpdateMsg_type_tag                 2
+#define SensorUpdateMsg_time_tag                 3
+#define SensorUpdateMsg_valueInt_tag             4
+#define SensorUpdateMsg_valueFloat_tag           5
+#define SensorUpdateMsg_valueBool_tag            6
 
 /* Struct field encoding specification for nanopb */
 #define DeviceUpdateMsg_FIELDLIST(X, a) \
-X(a, CALLBACK, SINGULAR, STRING,   deviceId,          1) \
+X(a, STATIC,   SINGULAR, UINT64,   deviceId,          1) \
 X(a, CALLBACK, REPEATED, MESSAGE,  sensor,            2)
 #define DeviceUpdateMsg_CALLBACK pb_default_field_callback
 #define DeviceUpdateMsg_DEFAULT NULL
 #define DeviceUpdateMsg_sensor_MSGTYPE SensorUpdateMsg
 
 #define SensorUpdateMsg_FIELDLIST(X, a) \
-X(a, CALLBACK, SINGULAR, STRING,   sensorId,          1) \
-X(a, STATIC,   ONEOF,    INT32,    (value,valueInt,value.valueInt),   2) \
-X(a, STATIC,   ONEOF,    FLOAT,    (value,valueFloat,value.valueFloat),   3) \
-X(a, STATIC,   ONEOF,    BOOL,     (value,valueBool,value.valueBool),   4)
-#define SensorUpdateMsg_CALLBACK pb_default_field_callback
+X(a, STATIC,   SINGULAR, UINT64,   sensorId,          1) \
+X(a, STATIC,   SINGULAR, UENUM,    type,              2) \
+X(a, STATIC,   SINGULAR, INT64,    time,              3) \
+X(a, STATIC,   ONEOF,    INT32,    (value,valueInt,value.valueInt),   4) \
+X(a, STATIC,   ONEOF,    FLOAT,    (value,valueFloat,value.valueFloat),   5) \
+X(a, STATIC,   ONEOF,    BOOL,     (value,valueBool,value.valueBool),   6)
+#define SensorUpdateMsg_CALLBACK NULL
 #define SensorUpdateMsg_DEFAULT NULL
 
 extern const pb_msgdesc_t DeviceUpdateMsg_msg;
@@ -69,7 +87,7 @@ extern const pb_msgdesc_t SensorUpdateMsg_msg;
 
 /* Maximum encoded size of messages (where known) */
 /* DeviceUpdateMsg_size depends on runtime parameters */
-/* SensorUpdateMsg_size depends on runtime parameters */
+#define SensorUpdateMsg_size                     35
 
 #ifdef __cplusplus
 } /* extern "C" */
