@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+message DeviceUpdateMsg {
+  uint64 deviceId = 1;
+  repeated SensorUpdateMsg sensor = 2;
+}
+
+message SensorUpdateMsg {
+  uint64 sensorId = 1;
+  enum Type {
+    TEMPERATURE = 0;
+    HUMIDITY = 1;
+  }
+  Type type = 2;
+  int64 time = 3;
+  oneof value {
+    int32 valueInt = 4;
+    float valueFloat = 5;
+    bool valueBool = 6;
+  };
+}
